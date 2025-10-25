@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>後台管理系統</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>後台管理系統</h1>
+            <div class="header-buttons">
+                <button onclick="location.href='index.html'" class="admin-btn">返回 POS</button>
+            </div>
+        </header>
+
+        <div class="admin-container">
+            <div class="admin-section">
+                <h2>數據管理</h2>
+                <div class="data-controls">
+                    <input type="file" id="jsonFileInput" accept=".json">
+                    <button onclick="loadJSONFile()" class="load-btn">載入 JSON 檔案</button>
+                    <button onclick="exportToCSV()" class="export-btn">導出 CSV (Excel)</button>
+                    <button onclick="showClearCacheModal()" class="clear-cache-admin-btn">清空緩存</button>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h2>商品管理</h2>
+                <div class="search-container">
+                    <input type="text" id="productSearchInput" class="search-input" placeholder="搜尋商品名稱或ID...">
+                    <button onclick="searchProductsAdmin()" class="search-btn">🔍</button>
+                    <button onclick="clearSearchAdmin()" class="clear-search-btn">✕</button>
+                </div>
+                <div class="products-table-container">
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>商品名稱</th>
+                                <th>價格</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="add-product-form">
+                    <input type="text" id="newProductName" placeholder="商品名稱">
+                    <input type="number" id="newProductPrice" placeholder="價格" min="0">
+                    <button onclick="addProduct()" class="add-btn">新增商品</button>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h2>銷售統計</h2>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>總銷售額</h3>
+                        <div class="stat-value" id="totalSales">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>總訂單數</h3>
+                        <div class="stat-value" id="totalOrders">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>總商品數量</h3>
+                        <div class="stat-value" id="totalItems">0</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 25px; margin-bottom: 15px;">銷售記錄</h3>
+                <table class="sales-table">
+                    <thead>
+                        <tr>
+                            <th>時間</th>
+                            <th>商品明細</th>
+                            <th>折扣</th>
+                            <th>備註</th>
+                            <th>總計</th>
+                            <th>收取</th>
+                            <th>找零</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="clearCacheModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header warning">
+                <div class="success-icon">⚠️</div>
+                <h2>清空緩存確認</h2>
+            </div>
+            <div class="modal-body">
+                <div class="warning-message">
+                    <p><strong>此操作將清空所有緩存數據！</strong></p>
+                    <p>包括：</p>
+                    <ul>
+                        <li>所有商品資料</li>
+                        <li>所有訂單記錄</li>
+                        <li>所有銷售統計</li>
+                    </ul>
+                    <p style="color: #f44336; font-weight: 600; margin-top: 15px;">
+                        此操作無法恢復，建議先導出 CSV 數據備份。
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeClearCacheModal()" class="modal-cancel-btn">取消</button>
+                <button onclick="confirmClearCache()" class="modal-delete-btn">確定清空</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteSaleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header warning">
+                <div class="success-icon">⚠️</div>
+                <h2>刪除銷售記錄確認</h2>
+            </div>
+            <div class="modal-body">
+                <div class="warning-message">
+                    <p><strong>確定要刪除此銷售記錄嗎？</strong></p>
+                    <p style="color: #f44336; font-weight: 600; margin-top: 15px;">
+                        刪除後將永久消失，無法救回！
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeDeleteSaleModal()" class="modal-cancel-btn">取消</button>
+                <button onclick="confirmDeleteSale()" class="modal-delete-btn">確定刪除</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

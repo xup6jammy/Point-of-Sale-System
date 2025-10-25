@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS 收銀系統</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="notification" class="notification">
+        <span class="icon">✓</span>
+        <span id="notificationMessage">計算完成</span>
+    </div>
+
+    <div class="container">
+        <header>
+            <div>
+                <h1>POS 收銀系統</h1>
+                <div class="header-time" id="headerTime"></div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item stat-revenue">
+                    <div class="stat-label">今日營業額</div>
+                    <div class="stat-value" id="todayRevenue">$0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">總訂單數</div>
+                    <div class="stat-value" id="totalOrders">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">賣出數量</div>
+                    <div class="stat-value" id="todayQuantity">0</div>
+                </div>
+            </div>
+            <div class="header-buttons">
+                <button onclick="location.href='admin.html'" class="admin-btn">後台管理</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="products-section">
+                <h2>商品選擇</h2>
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="搜尋商品...">
+                    <button onclick="searchProducts()" class="search-btn">🔍</button>
+                    <button onclick="clearSearch()" class="clear-search-btn">✕</button>
+                </div>
+                <div id="productsGrid" class="products-grid">
+                </div>
+            </div>
+
+            <div class="checkout-section">
+                <div class="order-summary">
+                    <h2>訂單明細</h2>
+                    <div id="orderItems" class="order-items">
+                    </div>
+                    <div class="order-discount-section" id="orderDiscountSection" style="display: none;">
+                        <div class="discount-info">
+                            <span>折扣:</span>
+                            <span id="discountDisplay">-$0</span>
+                        </div>
+                        <div class="discount-note-info">
+                            <span>折扣備註:</span>
+                            <span id="discountNoteDisplay">-</span>
+                        </div>
+                    </div>
+                    <div class="order-total">
+                        <h3>總計: <span id="totalAmount">$0</span></h3>
+                        <button onclick="showDiscountModal()" class="discount-btn" id="discountBtn" style="display: none;">折扣</button>
+                    </div>
+                </div>
+
+                <div class="payment-section">
+                    <h3>收款</h3>
+                    <div class="payment-row">
+                        <div class="payment-input-group">
+                            <label for="receivedAmount">收取金額:</label>
+                            <input type="number" id="receivedAmount" placeholder="輸入收取金額" min="0" inputmode="numeric" pattern="[0-9]*">
+                        </div>
+                        <div class="payment-buttons">
+                            <button onclick="completeOrder()" class="complete-btn">完成交易</button>
+                            <button onclick="clearOrder()" class="clear-btn">清空訂單</button>
+                        </div>
+                    </div>
+                    <div class="change-display">
+                        <h3>找零: <span id="changeAmount">$0</span></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="transactionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="success-icon">✓</div>
+                <h2>交易完成</h2>
+            </div>
+            <div class="modal-body">
+                <div class="transaction-info">
+                    <div class="info-row">
+                        <span class="info-label">時間</span>
+                        <span class="info-value" id="modalTime"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">商品數量</span>
+                        <span class="info-value" id="modalItemCount"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">收取金額</span>
+                        <span class="info-value" id="modalReceived"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">找零</span>
+                        <span class="info-value" id="modalChange"></span>
+                    </div>
+                </div>
+                <div class="transaction-items">
+                    <h4>商品明細</h4>
+                    <div id="modalItemsList"></div>
+                </div>
+                <div class="transaction-total">
+                    <div class="total-label">總金額</div>
+                    <div class="total-value" id="modalTotal">$0</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeTransactionModal()" class="modal-ok-btn">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="clearCacheModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header warning">
+                <div class="success-icon">⚠️</div>
+                <h2>清空緩存確認</h2>
+            </div>
+            <div class="modal-body">
+                <div class="warning-message">
+                    <p><strong>此操作將清空所有緩存數據！</strong></p>
+                    <p>包括：</p>
+                    <ul>
+                        <li>所有商品資料</li>
+                        <li>所有訂單記錄</li>
+                        <li>所有銷售統計</li>
+                    </ul>
+                    <p style="color: #f44336; font-weight: 600; margin-top: 15px;">
+                        此操作無法恢復，建議先到後台管理導出數據備份。
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeClearCacheModal()" class="modal-cancel-btn">取消</button>
+                <button onclick="confirmClearCache()" class="modal-delete-btn">確定清空</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header error">
+                <div class="success-icon">✕</div>
+                <h2>金額不足</h2>
+            </div>
+            <div class="modal-body">
+                <div class="error-message">
+                    <p>收取的金額不足以支付此訂單，請重新輸入正確的金額。</p>
+                </div>
+                <div class="error-info">
+                    <div class="error-info-row">
+                        <span>訂單總額:</span>
+                        <span id="errorTotalAmount">$0</span>
+                    </div>
+                    <div class="error-info-row">
+                        <span>收取金額:</span>
+                        <span id="errorReceivedAmount">$0</span>
+                    </div>
+                    <div class="error-info-row">
+                        <span>還需支付:</span>
+                        <span id="errorShortAmount" style="color: #f44336; font-weight: 700;">$0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeErrorModal()" class="modal-ok-btn" style="background: #f44336;">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modifyPriceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="success-icon">$</div>
+                <h2>修改價格</h2>
+            </div>
+            <div class="modal-body">
+                <div class="price-modify-info">
+                    <div class="info-row">
+                        <span class="info-label">商品名稱:</span>
+                        <span class="info-value" id="modifyPriceItemName"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">原始單價:</span>
+                        <span class="info-value" id="modifyPriceOriginal">$0</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">當前單價:</span>
+                        <span class="info-value" id="modifyPriceCurrent">$0</span>
+                    </div>
+                </div>
+                <div class="price-input-section">
+                    <label for="newPriceInput">新單價:</label>
+                    <input type="number" id="newPriceInput" placeholder="輸入新的單價" min="0" step="1">
+                    <small class="input-hint">提示：輸入 0 表示免費商品</small>
+                </div>
+                <div class="price-preview-section">
+                    <div class="preview-row">
+                        <span>數量:</span>
+                        <span id="modifyPriceQuantity">1</span>
+                    </div>
+                    <div class="preview-row">
+                        <span>新小計:</span>
+                        <span id="modifyPriceNewTotal" style="color: #4caf50; font-weight: 700; font-size: 18px;">$0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModifyPriceModal()" class="modal-cancel-btn">取消</button>
+                <button onclick="applyPriceModification()" class="modal-ok-btn">確定修改</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="discountModal" class="modal">
+        <div class="modal-content discount-modal-large">
+            <div class="modal-header">
+                <div class="success-icon">%</div>
+                <h2>折扣設定</h2>
+            </div>
+            <div class="modal-body">
+                <div class="discount-summary">
+                    <h4>商品明細</h4>
+                    <div id="discountItemsList"></div>
+                </div>
+                <div class="discount-calculation">
+                    <div class="calc-row">
+                        <span>原價總計:</span>
+                        <span id="discountOriginalTotal">$0</span>
+                    </div>
+
+                    <!-- 折扣模式切換 -->
+                    <div class="discount-mode-toggle">
+                        <button class="mode-btn active" id="percentModeBtn" onclick="switchDiscountMode('percent')">百分比折扣</button>
+                        <button class="mode-btn" id="amountModeBtn" onclick="switchDiscountMode('amount')">固定金額</button>
+                    </div>
+
+                    <!-- 百分比模式快捷按鈕 -->
+                    <div class="discount-quick-buttons" id="percentQuickButtons">
+                        <h5>快捷折扣</h5>
+                        <div class="quick-btn-container">
+                            <div class="quick-btn-grid">
+                                <button class="quick-discount-btn" data-percent="15" onclick="applyQuickDiscount(15)">85折</button>
+                                <button class="quick-discount-btn" data-percent="20" onclick="applyQuickDiscount(20)">80折</button>
+                                <button class="quick-discount-btn" data-percent="25" onclick="applyQuickDiscount(25)">75折</button>
+                                <button class="quick-discount-btn" data-percent="30" onclick="applyQuickDiscount(30)">70折</button>
+                            </div>
+                            <button class="cancel-discount-btn" onclick="cancelQuickDiscount()">
+                                <span class="cancel-icon">✕</span>
+                                <span class="cancel-text">取消折扣</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 折扣輸入 -->
+                    <div class="calc-row discount-input-row">
+                        <label for="discountValue" id="discountValueLabel">折扣百分比 (%):</label>
+                        <input type="number" id="discountValue" placeholder="輸入折扣百分比" min="0" max="100">
+                        <small class="input-hint" id="discountHint">例如：輸入 15 代表打 85 折</small>
+                    </div>
+
+                    <div class="calc-row">
+                        <label for="discountNote">折扣備註:</label>
+                        <input type="text" id="discountNote" placeholder="輸入折扣原因（選填）">
+                    </div>
+
+                    <div class="calc-row discount-preview">
+                        <span>折扣金額:</span>
+                        <span id="discountAmountPreview" style="color: #ff9800; font-weight: 700;">-$0</span>
+                    </div>
+
+                    <div class="calc-row final-total">
+                        <span>折扣後總計:</span>
+                        <span id="discountFinalTotal">$0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeDiscountModal()" class="modal-cancel-btn">取消</button>
+                <button onclick="applyDiscount()" class="modal-ok-btn">確定折扣</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
