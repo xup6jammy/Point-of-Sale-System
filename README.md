@@ -1,5 +1,5 @@
 # 📦 Point of Sale System (POS 系統)
-
+體驗 : https://xup6jammy.github.io/Point-of-Sale-System/
 一個功能完整的銷售時點情報系統（POS），專為零售與批發業務設計，採用純前端技術開發，無需伺服器即可運行。
 <img width="1902" height="1227" alt="image" src="https://github.com/user-attachments/assets/635e9562-8325-45b4-8e78-fa3240105db8" />
 <img width="1043" height="1208" alt="image" src="https://github.com/user-attachments/assets/e5fae870-5585-4900-88f0-ff07142a7165" />
